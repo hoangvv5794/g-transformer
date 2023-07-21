@@ -10,6 +10,7 @@
 
 data=$1
 exp_path=$2
+group_sentences=$3
 input=doc
 code=bpe
 
@@ -26,11 +27,12 @@ echo `date`, Prepraring data...
 # tokenize and sub-word
 bash exp_gtrans/prepare-bpe.sh raw_data/$data $tok_path
 
+echo `date`, Builder data...
 # data builder
 if [ $input == "doc" ]; then
-  python -m exp_gtrans.data_builder --datadir $tok_path --destdir $seg_path/ --source-lang $slang --target-lang $tlang --max-tokens 512 --max-sents 1000
+  python -m exp_gtrans.data_builder --datadir $tok_path --destdir $seg_path/ --source-lang $slang --target-lang $tlang --max-tokens 512 --max-sents 1000  --divided-group-sentences $group_sentences
 elif [ $input == "sent" ]; then
-  python -m exp_gtrans.data_builder --datadir $tok_path --destdir $seg_path/ --source-lang $slang --target-lang $tlang --max-tokens 512 --max-sents 1
+  python -m exp_gtrans.data_builder --datadir $tok_path --destdir $seg_path/ --source-lang $slang --target-lang $tlang --max-tokens 512 --max-sents 1  --divided-group-sentences $group_sentences
 fi
 
 # Preprocess/binarize the data

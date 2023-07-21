@@ -19,8 +19,15 @@ def convert_to_segment(args):
     def _segment_seqtag(src, tgt, num=None):
         src = src.split('</s>')
         tgt = tgt.split('</s>')
+        # Convert each sentences to group 3 or 5 or 7 of sentences.
+        div_src = []
+        div_tgt = []
+        for idx, chunk in enumerate(list(divide_chunks(src, args.divided_group_sentences))):
+            div_src.append(".".join(chunk))
+        for idx, chunk in enumerate(list(divide_chunks(tgt, args.divided_group_sentences))):
+            div_tgt.append(".".join(chunk))
         segs = []  # [max_tokens, max_segs, src, tgt]
-        for idx, (s, t) in enumerate(zip(src, tgt)):
+        for idx, (s, t) in enumerate(zip(div_src, div_tgt)):
             if len(s) == 0 and len(t) == 0:
                 continue
             assert len(s) > 0 and len(t) > 0
@@ -40,6 +47,11 @@ def convert_to_segment(args):
         srcs = [' '.join(s) for _, _, s, _ in segs]
         tgts = [' '.join(t) for _, _, _, t in segs]
         return srcs, tgts
+
+    def divide_chunks(l, n):
+        # looping till length l
+        for i in range(0, len(l), n):
+            yield l[i:i + n]
 
     logger.info('Building segmented data: %s' % args)
     # specify the segment function
@@ -73,11 +85,11 @@ def convert_to_segment(args):
             srcs_len = [len(line.split()) for line in srcs]
             if any(l > args.max_tokens for l in srcs_len):
                 logger.warning('Source doc has too long segment: corpus=%s, doc=%s, sents=%s, seg_len=%s, max_len=%s.'
-                                % (corpus, idx, len(src.split('</s>')), max(srcs_len), args.max_tokens))
+                               % (corpus, idx, len(src.split('</s>')), max(srcs_len), args.max_tokens))
             tgts_len = [len(line.split()) for line in tgts]
             if any(l > args.max_tokens for l in tgts_len):
                 logger.warning('Target doc has too long segment: corpus=%s, doc=%s, sents=%s, seg_len=%s, max_len=%s.'
-                                % (corpus, idx, len(tgt.split('</s>')), max(tgts_len), args.max_tokens))
+                               % (corpus, idx, len(tgt.split('</s>')), max(tgts_len), args.max_tokens))
             # persist
             src_data.extend(srcs)
             tgt_data.extend(tgts)
@@ -114,10 +126,12 @@ if __name__ == '__main__':
     parser.add_argument("--max-sents", default=1, type=int)
     parser.add_argument("--max-tokens", default=512, type=int)
     parser.add_argument("--min-train-doclen", default=-1, type=int)
+    parser.add_argument("--divided-group-sentences", default=1, type=int)
     parser.add_argument('--no-special-tok', action='store_true', default=False)
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO, filename='./data_builder.log', format="[%(asctime)s %(levelname)s] %(message)s")
+    logging.basicConfig(level=logging.INFO, filename='./data_builder.log',
+                        format="[%(asctime)s %(levelname)s] %(message)s")
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s] %(message)s"))
     logger.addHandler(console_handler)
@@ -127,4 +141,3 @@ if __name__ == '__main__':
     os.makedirs(args.tempdir, exist_ok=True)
 
     convert_to_segment(args)
-
