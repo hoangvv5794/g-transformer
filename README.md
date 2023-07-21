@@ -16,6 +16,20 @@ Before running the scripts, please install fairseq dependencies by:
 Please also follow the readmes under folder raw_data and mbart.cc25 to download raw data and pretrained model.
 (Notes: Our models were trained on 4 GPUs. If you trained them on 2 GPUs, in theory you could double the number for argument --update-freq. However, we haven't tested such settings.)
 
+## Edit by Hoangvv8
+* Evaluate with group n-sentences
+Add parameter --divided-group-sentences to divide a paragraph in chunk of 3 or 5 or n sentences
+So step prepare data follow this guide:
+- Random initialized:
+```
+    mkdir exp_randinit
+    bash exp_gtrans/run-all.sh prepare-randinit exp_randinit 3
+```
+- G-Transformer fine-tuned on mBART25:
+```
+    mkdir exp_mbart
+    bash exp_gtrans/run-all.sh prepare-mbart exp_mbart 3
+```
 ## Non-pretraining Settings
 
 ### G-Transformer random initialized
