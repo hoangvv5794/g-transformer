@@ -18,7 +18,7 @@ Please also follow the readmes under folder raw_data and mbart.cc25 to download 
 
 ## Edit by Hoangvv8
 * Evaluate with group n-sentences
-Add parameter --divided-group-sentences to divide a paragraph in chunk of 3 or 5 or n sentences
+Add parameter --divided-group-sentences to divide a paragraph in chunk of 3 or 5 or n sentences.
 So step prepare data follow this guide:
 - Random initialized:
 ```
